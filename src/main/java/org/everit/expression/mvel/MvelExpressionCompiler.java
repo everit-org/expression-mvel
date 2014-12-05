@@ -12,11 +12,6 @@ import org.mvel2.ParserContext;
 public class MvelExpressionCompiler implements ExpressionCompiler {
 
     @Override
-    public CompiledExpression compile(final String expression) {
-        return compile(expression, null);
-    }
-
-    @Override
     public CompiledExpression compile(final String expression, final ParserConfiguration parserContext) {
 
         Serializable compiledExpression;

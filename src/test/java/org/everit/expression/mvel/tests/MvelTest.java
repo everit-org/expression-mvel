@@ -14,7 +14,7 @@ public class MvelTest {
     @Test
     public void testExceptionWithLineNum() {
         MvelExpressionCompiler compiler = new MvelExpressionCompiler();
-        ParserConfiguration parserContext = new ParserConfiguration();
+        ParserConfiguration parserContext = new ParserConfiguration(this.getClass().getClassLoader());
 
         parserContext.setColumn(5);
         parserContext.setLineNumber(3);
@@ -33,7 +33,8 @@ public class MvelTest {
     @Test
     public void testSimpleExpression() {
         MvelExpressionCompiler compiler = new MvelExpressionCompiler();
-        CompiledExpression compiled = compiler.compile("a.intValue() + b");
+        CompiledExpression compiled = compiler.compile("a.intValue() + b", new ParserConfiguration(this.getClass()
+                .getClassLoader()));
         Map<String, Object> vars = new HashMap<String, Object>();
         vars.put("a", 1);
         vars.put("b", 2);
