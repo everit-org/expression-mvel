@@ -26,8 +26,13 @@ public class MvelCompiledExpression implements CompiledExpression {
         try {
             return MVEL.executeExpression(mvelExpression, vars);
         } catch (CompileException e) {
-            e.setLineNumber(lineCount + e.getLineNumber() - 1);
-            e.setColumn(lineOffset + e.getColumn() - 1);
+            int eLine = e.getLineNumber();
+            e.setLineNumber(lineCount + eLine - 1);
+            if (eLine == lineCount) {
+                e.setColumn(lineOffset + e.getColumn() - 1);
+            } else {
+                e.setColumn(e.getColumn() + 1);
+            }
             throw e;
         }
     }
