@@ -19,7 +19,9 @@ public class MvelTest {
         parserContext.setColumn(5);
         parserContext.setLineNumber(3);
 
-        CompiledExpression compiled = compiler.compile("ann.xx()", parserContext);
+        String testExpression = "ann.xx()";
+        CompiledExpression compiled = compiler.compile(testExpression.toCharArray(), 0, testExpression.length(),
+                parserContext);
         Map<String, Object> vars = new HashMap<String, Object>();
         vars.put("a", 0);
         try {
@@ -33,8 +35,9 @@ public class MvelTest {
     @Test
     public void testSimpleExpression() {
         MvelExpressionCompiler compiler = new MvelExpressionCompiler();
-        CompiledExpression compiled = compiler.compile("a.intValue() + b", new ParserConfiguration(this.getClass()
-                .getClassLoader()));
+        String testExpression = "  a.intValue() + b";
+        CompiledExpression compiled = compiler.compile(testExpression.toCharArray(), 2, testExpression.length() - 2,
+                new ParserConfiguration(this.getClass().getClassLoader()));
         Map<String, Object> vars = new HashMap<String, Object>();
         vars.put("a", 1);
         vars.put("b", 2);

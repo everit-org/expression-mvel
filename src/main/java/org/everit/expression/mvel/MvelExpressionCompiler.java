@@ -12,7 +12,8 @@ import org.mvel2.ParserContext;
 public class MvelExpressionCompiler implements ExpressionCompiler {
 
     @Override
-    public CompiledExpression compile(final String expression, final ParserConfiguration parserContext) {
+    public CompiledExpression compile(final char[] expression, final int start, final int offset,
+            final ParserConfiguration parserContext) {
 
         Serializable compiledExpression;
         int lineCount = 1;
@@ -25,7 +26,7 @@ public class MvelExpressionCompiler implements ExpressionCompiler {
             org.mvel2.ParserContext mvelContext = new ParserContext(mvelConfiguration);
             lineCount = parserContext.getLineNumber();
             lineOffset = parserContext.getColumn();
-            compiledExpression = MVEL.compileExpression(expression.toCharArray(), 0, expression.length(), mvelContext);
+            compiledExpression = MVEL.compileExpression(expression, start, offset, mvelContext);
         }
 
         return new MvelCompiledExpression(compiledExpression, lineCount, lineOffset);
