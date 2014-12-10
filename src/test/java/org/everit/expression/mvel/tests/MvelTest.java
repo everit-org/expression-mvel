@@ -19,7 +19,7 @@ public class MvelTest {
         parserContext.setColumn(5);
         parserContext.setLineNumber(3);
 
-        String testExpression = "\n\n  1 + a.x()";
+        String testExpression = " \n   fff.xx()";
         CompiledExpression compiled = compiler.compile(testExpression.toCharArray(), 0, testExpression.length(),
                 parserContext);
         Map<String, Object> vars = new HashMap<String, Object>();

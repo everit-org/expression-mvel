@@ -28,6 +28,15 @@ public class MvelCompiledExpression implements CompiledExpression {
         this.exprWithContext = exprWithContext;
     }
 
+    private int countColumnBeforeCursor(final int cursor) {
+        int position = cursor + exprStartInContext;
+        for (; position > exprStartInContext
+                && exprWithContext[position] != '\n'; position--) {
+            ;
+        }
+        return cursor + exprStartInContext - position;
+    }
+
     private int countLineEndsInExpressionTillCursor(final int cursor) {
         int lineEnds = 0;
         for (int i = exprStartInContext; i < cursor; i++) {
@@ -46,6 +55,10 @@ public class MvelCompiledExpression implements CompiledExpression {
             int eLineNumber = e.getLineNumber() + countLineEndsInExpressionTillCursor(e.getCursor());
             e.setLineNumber(lineCount + eLineNumber - 1);
             int ecolumn = e.getColumn();
+            if (e.getColumn() == 0) {
+                ecolumn = countColumnBeforeCursor(e.getCursor());
+                e.setColumn(ecolumn);
+            }
             if (eLineNumber == 1) {
                 e.setColumn(lineOffset + ecolumn);
             }
