@@ -13,22 +13,21 @@ public class MvelExpressionCompiler implements ExpressionCompiler {
 
     @Override
     public CompiledExpression compile(final char[] expression, final int start, final int offset,
-            final ParserConfiguration parserContext) {
+            final ParserConfiguration parserConfiguration) {
 
-        Serializable compiledExpression;
-        int lineCount = 1;
-        int lineOffset = 1;
-        if (parserContext == null) {
-            compiledExpression = MVEL.compileExpression(expression);
-        } else {
-            org.mvel2.ParserConfiguration mvelConfiguration = new org.mvel2.ParserConfiguration();
-            mvelConfiguration.setClassLoader(parserContext.getClassLoader());
-            org.mvel2.ParserContext mvelContext = new ParserContext(mvelConfiguration);
-            lineCount = parserContext.getLineNumber();
-            lineOffset = parserContext.getColumn();
-            compiledExpression = MVEL.compileExpression(expression, start, offset, mvelContext);
+        if (parserConfiguration == null) {
+            throw new IllegalArgumentException("Parser configuration must be defined");
         }
 
-        return new MvelCompiledExpression(compiledExpression, lineCount, lineOffset);
+        org.mvel2.ParserConfiguration mvelConfiguration = new org.mvel2.ParserConfiguration();
+        mvelConfiguration.setClassLoader(parserConfiguration.getClassLoader());
+        org.mvel2.ParserContext mvelContext = new ParserContext(mvelConfiguration);
+
+        Serializable compiledExpression = MVEL
+                .compileExpression(String.valueOf(expression, start, offset), mvelContext);
+
+        int lineCount = parserConfiguration.getLineNumber();
+        int lineOffset = parserConfiguration.getColumn();
+        return new MvelCompiledExpression(compiledExpression, expression, start, lineCount, lineOffset);
     }
 }

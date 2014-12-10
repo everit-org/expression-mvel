@@ -19,7 +19,7 @@ public class MvelTest {
         parserContext.setColumn(5);
         parserContext.setLineNumber(3);
 
-        String testExpression = "ann.xx()";
+        String testExpression = "\n\n  1 + a.x()";
         CompiledExpression compiled = compiler.compile(testExpression.toCharArray(), 0, testExpression.length(),
                 parserContext);
         Map<String, Object> vars = new HashMap<String, Object>();
@@ -27,7 +27,7 @@ public class MvelTest {
         try {
             compiled.eval(vars);
         } catch (RuntimeException e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
 
     }

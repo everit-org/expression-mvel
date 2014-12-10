@@ -9,16 +9,33 @@ import org.mvel2.MVEL;
 
 public class MvelCompiledExpression implements CompiledExpression {
 
+    private final int exprStartInContext;
+
+    private final char[] exprWithContext;
+
     private final int lineCount;
 
     private final int lineOffset;
 
     private final Serializable mvelExpression;
 
-    public MvelCompiledExpression(final Serializable mvelExpression, final int lineCount, final int lineOffset) {
+    public MvelCompiledExpression(final Serializable mvelExpression, final char[] exprWithContext,
+            final int expressionStartInContext, final int lineCount, final int lineOffset) {
         this.mvelExpression = mvelExpression;
         this.lineCount = lineCount;
         this.lineOffset = lineOffset;
+        this.exprStartInContext = expressionStartInContext;
+        this.exprWithContext = exprWithContext;
+    }
+
+    private int countLineEndsInExpressionTillCursor(final int cursor) {
+        int lineEnds = 0;
+        for (int i = exprStartInContext; i < cursor; i++) {
+            if (exprWithContext[i] == '\n') {
+                lineEnds++;
+            }
+        }
+        return lineEnds;
     }
 
     @Override
@@ -26,15 +43,73 @@ public class MvelCompiledExpression implements CompiledExpression {
         try {
             return MVEL.executeExpression(mvelExpression, vars);
         } catch (CompileException e) {
-            int eLine = e.getLineNumber();
-            e.setLineNumber(lineCount + eLine - 1);
-            if (eLine == lineCount) {
-                e.setColumn(lineOffset + e.getColumn() - 1);
-            } else {
-                e.setColumn(e.getColumn() + 1);
+            int eLineNumber = e.getLineNumber() + countLineEndsInExpressionTillCursor(e.getCursor());
+            e.setLineNumber(lineCount + eLineNumber - 1);
+            int ecolumn = e.getColumn();
+            if (eLineNumber == 1) {
+                e.setColumn(lineOffset + ecolumn);
             }
+            putCurrentLine(e);
+
             throw e;
         }
+    }
+
+    private void putCurrentLine(final CompileException e) {
+        // Please note that this has to be done as CompileException is buggy if there are new lines in the expr
+        int cursor = exprStartInContext + e.getCursor();
+
+        if (cursor == 0 && exprWithContext[cursor] <= ' ') {
+            int additionalLineNum = 0;
+            int column = e.getColumn();
+            for (cursor = 0; cursor < exprWithContext.length && exprWithContext[cursor] <= ' '; cursor++) {
+                if (exprWithContext[cursor] == '\n') {
+                    additionalLineNum++;
+                    column = 1;
+                } else {
+                    column++;
+                }
+            }
+            e.setColumn(column);
+            e.setLineNumber(e.getLineNumber() + additionalLineNum);
+        }
+
+        int positionOfNewLineBefore = cursor;
+
+        int lowestPosition = cursor - 20;
+        if (lowestPosition < 0) {
+            lowestPosition = -1;
+        }
+        while (positionOfNewLineBefore > lowestPosition && exprWithContext[positionOfNewLineBefore] >= ' ') {
+            positionOfNewLineBefore--;
+        }
+        positionOfNewLineBefore++;
+
+        while (positionOfNewLineBefore < cursor && exprWithContext[positionOfNewLineBefore] == ' ') {
+            positionOfNewLineBefore++;
+        }
+
+        int positionOfNewLineAfter = cursor;
+        int highestPosition = cursor + 30;
+        if (highestPosition >= exprWithContext.length) {
+            highestPosition = exprWithContext.length - 1;
+        }
+        while (positionOfNewLineAfter <= highestPosition && exprWithContext[positionOfNewLineAfter] >= ' ') {
+            positionOfNewLineAfter++;
+        }
+        positionOfNewLineAfter--;
+
+        while (positionOfNewLineAfter > cursor && exprWithContext[positionOfNewLineAfter] == ' ') {
+            positionOfNewLineAfter--;
+        }
+
+        int length = positionOfNewLineAfter - positionOfNewLineBefore + 1;
+
+        char[] reducedExpr = new char[length];
+
+        System.arraycopy(exprWithContext, positionOfNewLineBefore, reducedExpr, 0, length);
+        e.setExpr(reducedExpr);
+        e.setCursor(cursor - positionOfNewLineBefore);
     }
 
 }
