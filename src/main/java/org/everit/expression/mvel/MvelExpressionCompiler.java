@@ -21,6 +21,7 @@ public class MvelExpressionCompiler implements ExpressionCompiler {
 
         org.mvel2.ParserConfiguration mvelConfiguration = new org.mvel2.ParserConfiguration();
         mvelConfiguration.setClassLoader(parserConfiguration.getClassLoader());
+
         org.mvel2.ParserContext mvelContext = new ParserContext(mvelConfiguration);
 
         Serializable compiledExpression = MVEL
