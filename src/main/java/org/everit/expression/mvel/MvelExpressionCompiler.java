@@ -6,14 +6,14 @@ import org.everit.expression.CompiledExpression;
 import org.everit.expression.ExpressionCompiler;
 import org.everit.expression.ParserConfiguration;
 import org.everit.expression.mvel.internal.MvelCompiledExpression;
+import org.mvel2.CompileException;
 import org.mvel2.MVEL;
 import org.mvel2.ParserContext;
 
 public class MvelExpressionCompiler implements ExpressionCompiler {
 
     @Override
-    public CompiledExpression compile(final char[] expression, final int start, final int offset,
-            final ParserConfiguration parserConfiguration) {
+    public CompiledExpression compile(final String expression, final ParserConfiguration parserConfiguration) {
 
         if (parserConfiguration == null) {
             throw new IllegalArgumentException("Parser configuration must be defined");
@@ -24,11 +24,21 @@ public class MvelExpressionCompiler implements ExpressionCompiler {
 
         org.mvel2.ParserContext mvelContext = new ParserContext(mvelConfiguration);
 
-        Serializable compiledExpression = MVEL
-                .compileExpression(String.valueOf(expression, start, offset), mvelContext);
+        try {
 
-        int lineCount = parserConfiguration.getLineNumber();
-        int lineOffset = parserConfiguration.getColumn();
-        return new MvelCompiledExpression(compiledExpression, expression, start, lineCount, lineOffset);
+            Serializable compiledExpression = MVEL.compileExpression(expression, mvelContext);
+            return new MvelCompiledExpression(compiledExpression, parserConfiguration.getLineNumber(),
+                    parserConfiguration.getColumn());
+
+        } catch (CompileException e) {
+            e.getMessage();
+            if (e.getLineNumber() == 1) {
+                e.setColumn(e.getColumn() + parserConfiguration.getColumn() - 1);
+            }
+            e.setLineNumber(e.getLineNumber() + parserConfiguration.getLineNumber() - 1);
+
+            throw e;
+        }
+
     }
 }
