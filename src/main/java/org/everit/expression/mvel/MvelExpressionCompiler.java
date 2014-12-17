@@ -27,15 +27,15 @@ public class MvelExpressionCompiler implements ExpressionCompiler {
         try {
 
             Serializable compiledExpression = MVEL.compileExpression(expression, mvelContext);
-            return new MvelCompiledExpression(compiledExpression, parserConfiguration.getLineNumber(),
-                    parserConfiguration.getColumn());
+            return new MvelCompiledExpression(compiledExpression, parserConfiguration.getStartRow(),
+                    parserConfiguration.getStartColumn());
 
         } catch (CompileException e) {
             e.getMessage();
             if (e.getLineNumber() == 1) {
-                e.setColumn(e.getColumn() + parserConfiguration.getColumn() - 1);
+                e.setColumn(e.getColumn() + parserConfiguration.getStartColumn() - 1);
             }
-            e.setLineNumber(e.getLineNumber() + parserConfiguration.getLineNumber() - 1);
+            e.setLineNumber(e.getLineNumber() + parserConfiguration.getStartRow() - 1);
 
             throw e;
         }

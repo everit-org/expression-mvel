@@ -16,8 +16,8 @@ public class MvelTest {
         MvelExpressionCompiler compiler = new MvelExpressionCompiler();
         ParserConfiguration parserContext = new ParserConfiguration(this.getClass().getClassLoader());
 
-        parserContext.setColumn(5);
-        parserContext.setLineNumber(3);
+        parserContext.setStartColumn(5);
+        parserContext.setStartRow(3);
 
         String testExpression = " \n   1.xx()";
         CompiledExpression compiled = compiler.compile(testExpression, parserContext);
