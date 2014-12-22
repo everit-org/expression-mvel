@@ -1,6 +1,7 @@
 package org.everit.expression.mvel;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import org.everit.expression.CompiledExpression;
 import org.everit.expression.ExpressionCompiler;
@@ -23,6 +24,12 @@ public class MvelExpressionCompiler implements ExpressionCompiler {
         mvelConfiguration.setClassLoader(parserConfiguration.getClassLoader());
 
         org.mvel2.ParserContext mvelContext = new ParserContext(mvelConfiguration);
+        @SuppressWarnings("rawtypes")
+        Map nonGenericVariableTypes = parserConfiguration.getVariableTypes();
+
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        Map<String, Class> halfGenericVariableTypes = nonGenericVariableTypes;
+        mvelContext.setInputs(halfGenericVariableTypes);
 
         try {
 
