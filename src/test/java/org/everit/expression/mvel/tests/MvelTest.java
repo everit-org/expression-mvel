@@ -19,7 +19,7 @@ public class MvelTest {
         parserContext.setStartColumn(5);
         parserContext.setStartRow(3);
 
-        String testExpression = " \n   1.xx()";
+        String testExpression = " \n   a.xx()";
         CompiledExpression compiled = compiler.compile(testExpression, parserContext);
         Map<String, Object> vars = new HashMap<String, Object>();
         vars.put("a", 0);
