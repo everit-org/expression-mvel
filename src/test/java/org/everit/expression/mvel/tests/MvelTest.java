@@ -1,3 +1,19 @@
+/**
+ * This file is part of Everit - Expression MVEL.
+ *
+ * Everit - Expression MVEL is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Everit - Expression MVEL is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Everit - Expression MVEL.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.everit.expression.mvel.tests;
 
 import java.util.HashMap;
@@ -21,11 +37,11 @@ public class MvelTest {
         parserContext.setStartRow(21);
 
         String testExpression = " \n   a.substring(-1)";
-        CompiledExpression compiled = compiler.compile(testExpression, parserContext);
+        CompiledExpression compiledExpression = compiler.compile(testExpression, parserContext);
         Map<String, Object> vars = new HashMap<String, Object>();
         vars.put("a", "test");
         try {
-            compiled.eval(vars);
+            compiledExpression.eval(vars);
             Assert.fail("Exception should have been thrown");
         } catch (CompileException e) {
             // Positions are wrong here due to the bug of MVEL
