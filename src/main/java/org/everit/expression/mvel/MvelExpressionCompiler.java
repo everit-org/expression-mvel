@@ -14,6 +14,12 @@ import org.mvel2.ParserContext;
 public class MvelExpressionCompiler implements ExpressionCompiler {
 
     @Override
+    public CompiledExpression compile(final char[] document, final int expressionStart, final int expressionLength,
+            final ParserConfiguration parserConfiguration) {
+        return compile(String.valueOf(document, expressionStart, expressionLength), parserConfiguration);
+    }
+
+    @Override
     public CompiledExpression compile(final String expression, final ParserConfiguration parserConfiguration) {
 
         if (parserConfiguration == null) {
