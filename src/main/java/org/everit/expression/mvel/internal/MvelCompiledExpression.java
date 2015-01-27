@@ -22,16 +22,21 @@ import java.util.Map;
 import org.everit.expression.CompiledExpression;
 import org.mvel2.CompileException;
 import org.mvel2.MVEL;
+import org.mvel2.PropertyAccessException;
 
 public class MvelCompiledExpression implements CompiledExpression {
 
     private final int column;
 
+    private final String expression;
+
     private final int lineNumber;
 
     private final Serializable mvelExpression;
 
-    public MvelCompiledExpression(final Serializable mvelExpression, final int lineNumber, final int column) {
+    public MvelCompiledExpression(final String expression, final Serializable mvelExpression, final int lineNumber,
+            final int column) {
+        this.expression = expression;
         this.mvelExpression = mvelExpression;
         this.lineNumber = lineNumber;
         this.column = column;
@@ -49,6 +54,13 @@ public class MvelCompiledExpression implements CompiledExpression {
             e.setLineNumber(e.getLineNumber() + lineNumber - 1);
 
             throw e;
+        } catch (NoClassDefFoundError e) {
+            PropertyAccessException pe = new PropertyAccessException("Type of variable could not be resolved.",
+                    expression.toCharArray(), 0, e);
+
+            pe.setColumn(column);
+            pe.setLineNumber(lineNumber);
+            throw pe;
         }
     }
 
