@@ -29,7 +29,7 @@
 
   <groupId>org.everit.expression</groupId>
   <artifactId>org.everit.expression.mvel</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Everit - Expression MVEL</name>
