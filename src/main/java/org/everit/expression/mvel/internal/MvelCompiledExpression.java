@@ -55,7 +55,8 @@ public class MvelCompiledExpression implements CompiledExpression {
 
             throw e;
         } catch (NoClassDefFoundError e) {
-            PropertyAccessException pe = new PropertyAccessException("Type of variable could not be resolved.",
+            PropertyAccessException pe = new PropertyAccessException(
+                    "Type of variable or property could not be resolved during evaluating expression.",
                     expression.toCharArray(), 0, e);
 
             pe.setColumn(column);
