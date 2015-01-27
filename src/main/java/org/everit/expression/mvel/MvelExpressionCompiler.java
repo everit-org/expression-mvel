@@ -22,6 +22,7 @@ import java.util.Map;
 import org.everit.expression.CompiledExpression;
 import org.everit.expression.ExpressionCompiler;
 import org.everit.expression.ParserConfiguration;
+import org.everit.expression.mvel.internal.MixedMVELClassLoader;
 import org.everit.expression.mvel.internal.MvelCompiledExpression;
 import org.mvel2.CompileException;
 import org.mvel2.MVEL;
@@ -43,7 +44,7 @@ public class MvelExpressionCompiler implements ExpressionCompiler {
         }
 
         org.mvel2.ParserConfiguration mvelConfiguration = new org.mvel2.ParserConfiguration();
-        mvelConfiguration.setClassLoader(parserConfiguration.getClassLoader());
+        mvelConfiguration.setClassLoader(new MixedMVELClassLoader(parserConfiguration.getClassLoader()));
 
         org.mvel2.ParserContext mvelContext = new ParserContext(mvelConfiguration);
         @SuppressWarnings("rawtypes")
