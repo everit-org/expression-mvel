@@ -57,7 +57,7 @@ public class MvelExpressionCompiler implements ExpressionCompiler {
         try {
 
             Serializable compiledExpression = MVEL.compileExpression(expression, mvelContext);
-            return new MvelCompiledExpression(compiledExpression, parserConfiguration.getStartRow(),
+            return new MvelCompiledExpression(expression, compiledExpression, parserConfiguration.getStartRow(),
                     parserConfiguration.getStartColumn());
 
         } catch (CompileException e) {
@@ -69,6 +69,5 @@ public class MvelExpressionCompiler implements ExpressionCompiler {
 
             throw e;
         }
-
     }
 }
