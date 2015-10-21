@@ -1,22 +1,23 @@
-/**
- * This file is part of Everit - Expression MVEL.
+/*
+ * Copyright (C) 2011 Everit Kft. (http://www.everit.biz)
  *
- * Everit - Expression MVEL is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Everit - Expression MVEL is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
+ *         http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Everit - Expression MVEL.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.everit.expression.mvel;
 
 import java.io.Serializable;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Map;
 
 import org.everit.expression.CompiledExpression;
@@ -28,46 +29,74 @@ import org.mvel2.CompileException;
 import org.mvel2.MVEL;
 import org.mvel2.ParserContext;
 
+/**
+ * The MVEL {@link ExpressionCompiler}.
+ */
 public class MvelExpressionCompiler implements ExpressionCompiler {
 
-    @Override
-    public CompiledExpression compile(final char[] document, final int expressionStart, final int expressionLength,
-            final ParserConfiguration parserConfiguration) {
-        return compile(String.valueOf(document, expressionStart, expressionLength), parserConfiguration);
+  /**
+   * A {@link PrivilegedAction} that creates a {@link MixedMVELClassLoader}.
+   */
+  private static final class MixedMVELClassLoaderCreator implements PrivilegedAction<ClassLoader> {
+
+    private final ParserConfiguration parserConfiguration;
+
+    private MixedMVELClassLoaderCreator(final ParserConfiguration parserConfiguration) {
+      this.parserConfiguration = parserConfiguration;
     }
 
     @Override
-    public CompiledExpression compile(final String expression, final ParserConfiguration parserConfiguration) {
-
-        if (parserConfiguration == null) {
-            throw new IllegalArgumentException("Parser configuration must be defined");
-        }
-
-        org.mvel2.ParserConfiguration mvelConfiguration = new org.mvel2.ParserConfiguration();
-        mvelConfiguration.setClassLoader(new MixedMVELClassLoader(parserConfiguration.getClassLoader()));
-
-        org.mvel2.ParserContext mvelContext = new ParserContext(mvelConfiguration);
-        @SuppressWarnings("rawtypes")
-        Map nonGenericVariableTypes = parserConfiguration.getVariableTypes();
-
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        Map<String, Class> halfGenericVariableTypes = nonGenericVariableTypes;
-        mvelContext.setInputs(halfGenericVariableTypes);
-
-        try {
-
-            Serializable compiledExpression = MVEL.compileExpression(expression, mvelContext);
-            return new MvelCompiledExpression(expression, compiledExpression, parserConfiguration.getStartRow(),
-                    parserConfiguration.getStartColumn());
-
-        } catch (CompileException e) {
-            e.getMessage();
-            if (e.getLineNumber() == 1) {
-                e.setColumn(e.getColumn() + parserConfiguration.getStartColumn() - 1);
-            }
-            e.setLineNumber(e.getLineNumber() + parserConfiguration.getStartRow() - 1);
-
-            throw e;
-        }
+    public ClassLoader run() {
+      return new MixedMVELClassLoader(parserConfiguration.getClassLoader());
     }
+
+  }
+
+  @Override
+  public CompiledExpression compile(final char[] document, final int expressionStart,
+      final int expressionLength,
+      final ParserConfiguration parserConfiguration) {
+    return compile(String.valueOf(document, expressionStart, expressionLength),
+        parserConfiguration);
+  }
+
+  @Override
+  public CompiledExpression compile(final String expression,
+      final ParserConfiguration parserConfiguration) {
+
+    if (parserConfiguration == null) {
+      throw new IllegalArgumentException("Parser configuration must be defined");
+    }
+
+    org.mvel2.ParserConfiguration mvelConfiguration = new org.mvel2.ParserConfiguration();
+
+    ClassLoader classLoader =
+        AccessController.doPrivileged(new MixedMVELClassLoaderCreator(parserConfiguration));
+    mvelConfiguration.setClassLoader(classLoader);
+
+    ParserContext mvelContext = new ParserContext(mvelConfiguration);
+    @SuppressWarnings("rawtypes")
+    Map nonGenericVariableTypes = parserConfiguration.getVariableTypes();
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    Map<String, Class> halfGenericVariableTypes = nonGenericVariableTypes;
+    mvelContext.setInputs(halfGenericVariableTypes);
+
+    try {
+
+      Serializable compiledExpression = MVEL.compileExpression(expression, mvelContext);
+      return new MvelCompiledExpression(expression, compiledExpression,
+          parserConfiguration.getStartRow(),
+          parserConfiguration.getStartColumn());
+
+    } catch (CompileException e) {
+      e.getMessage();
+      if (e.getLineNumber() == 1) {
+        e.setColumn((e.getColumn() + parserConfiguration.getStartColumn()) - 1);
+      }
+      e.setLineNumber((e.getLineNumber() + parserConfiguration.getStartRow()) - 1);
+
+      throw e;
+    }
+  }
 }
