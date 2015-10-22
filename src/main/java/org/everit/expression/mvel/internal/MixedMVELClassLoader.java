@@ -17,6 +17,7 @@ package org.everit.expression.mvel.internal;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Enumeration;
 
 import org.mvel2.compiler.Accessor;
@@ -45,16 +46,25 @@ public class MixedMVELClassLoader extends ClassLoader {
 
   @Override
   protected Class<?> findClass(final String name) throws ClassNotFoundException {
+    if (mvelClassLoader == null) {
+      throw new ClassNotFoundException(name);
+    }
     return mvelClassLoader.loadClass(name);
   }
 
   @Override
   protected URL findResource(final String name) {
+    if (mvelClassLoader == null) {
+      return null;
+    }
     return mvelClassLoader.getResource(name);
   }
 
   @Override
   protected Enumeration<URL> findResources(final String name) throws IOException {
+    if (mvelClassLoader == null) {
+      return Collections.emptyEnumeration();
+    }
     return mvelClassLoader.getResources(name);
   }
 
