@@ -3,3 +3,6 @@
 /.classpath
 /.project
 /.checkstyle
+.pmd
+.pmdruleset.xml
+.fbExcludeFilterFile
