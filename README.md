@@ -1,4 +1,4 @@
 expression-mvel
 ===============
 
-Documentation: http://wwww.everit.org/expression-mvel
+Documentation: http://www.everit.org/expression-mvel
