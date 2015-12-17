@@ -91,12 +91,13 @@ public class MvelExpressionCompiler implements ExpressionCompiler {
 
     } catch (CompileException e) {
       e.getMessage();
+      int columnNumber = e.getColumn();
       if (e.getLineNumber() == 1) {
-        e.setColumn((e.getColumn() + parserConfiguration.getStartColumn()) - 1);
+        columnNumber = (e.getColumn() + parserConfiguration.getStartColumn()) - 1;
       }
-      e.setLineNumber((e.getLineNumber() + parserConfiguration.getStartRow()) - 1);
-
-      throw e;
+      int lineNumber = (e.getLineNumber() + parserConfiguration.getStartRow()) - 1;
+      throw new NamedCompileException(parserConfiguration.getName(), e, columnNumber,
+          lineNumber);
     }
   }
 }
