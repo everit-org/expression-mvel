@@ -63,7 +63,6 @@ public class MvelTest {
     } catch (CompileException e) {
       Assert.assertEquals(22, e.getLineNumber());
       Assert.assertEquals(4, e.getColumn());
-      System.out.println(e.getMessage());
     }
 
   }
